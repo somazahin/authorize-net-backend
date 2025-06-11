@@ -9,6 +9,19 @@
     "authorizenet": "^1.0.0",
     "body-parser": "^1.20.2",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2"
-  }
+    "express": "^4.18.2",
+    "uuidv4": "^6.2.13"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/somazahin/authorize-net-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/somazahin/authorize-net-backend/issues"
+  },
+  "homepage": "https://github.com/somazahin/authorize-net-backend#readme",
+  "description": ""
 }
