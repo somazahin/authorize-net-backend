@@ -1,6 +1,5 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const { uuid } = require("uuidv4");
 const { APIContracts, APIControllers } = require("authorizenet");
 require("dotenv").config();
 
@@ -8,7 +7,7 @@ const app = express();
 app.use(bodyParser.json());
 
 app.post("/create-payment-token", async (req, res) => {
-  const { apiLoginId, transactionKey, amount, transactionId } = req.body;
+  const { apiLoginId, transactionKey, amount } = req.body;
 
   const merchantAuthenticationType = new APIContracts.MerchantAuthenticationType();
   merchantAuthenticationType.setName(apiLoginId || process.env.API_LOGIN_ID);
@@ -24,16 +23,16 @@ app.post("/create-payment-token", async (req, res) => {
 
   const settings = [];
 
-  const setting1 = new APIContracts.SettingType();
-  setting1.setSettingName("hostedPaymentReturnOptions");
-  setting1.setSettingValue(JSON.stringify({
+  const returnOptions = new APIContracts.SettingType();
+  returnOptions.setSettingName("hostedPaymentReturnOptions");
+  returnOptions.setSettingValue(JSON.stringify({
     showReceipt: false,
     url: "https://www.luxury-lounger.com/thank-you",
     urlText: "Continue",
     cancelUrl: "https://www.luxury-lounger.com/payment-failed",
     cancelUrlText: "Cancel"
   }));
-  settings.push(setting1);
+  settings.push(returnOptions);
 
   request.setHostedPaymentSettings({ setting: settings });
 
@@ -45,9 +44,17 @@ app.post("/create-payment-token", async (req, res) => {
 
     if (response != null && response.getMessages().getResultCode() === APIContracts.MessageTypeEnum.OK) {
       const token = response.getToken();
-      res.json({ token });
+      const encodedToken = encodeURIComponent(token);
+      const redirectUrl = `https://test.authorize.net/payment/payment/${encodedToken}`;
+
+      res.json({
+        token,
+        redirectUrl
+      });
     } else {
-      res.status(500).json({ message: response.getMessages().getMessage()[0].getText() });
+      res.status(500).json({
+        message: response.getMessages().getMessage()[0].getText()
+      });
     }
   });
 });
