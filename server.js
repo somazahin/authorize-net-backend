@@ -25,13 +25,15 @@ app.post("/create-payment-token", async (req, res) => {
 
   const returnOptions = new APIContracts.SettingType();
   returnOptions.setSettingName("hostedPaymentReturnOptions");
-  returnOptions.setSettingValue(JSON.stringify({
-    showReceipt: false,
-    url: "https://www.luxury-lounger.com/thank-you",
-    urlText: "Continue",
-    cancelUrl: "https://www.luxury-lounger.com/payment-failed",
-    cancelUrlText: "Cancel"
-  }));
+  returnOptions.setSettingValue(
+    JSON.stringify({
+      showReceipt: false,
+      url: "https://www.luxury-lounger.com/thank-you",
+      urlText: "Continue",
+      cancelUrl: "https://www.luxury-lounger.com/payment-failed",
+      cancelUrlText: "Cancel",
+    })
+  );
   settings.push(returnOptions);
 
   request.setHostedPaymentSettings({ setting: settings });
@@ -42,18 +44,22 @@ app.post("/create-payment-token", async (req, res) => {
     const apiResponse = ctrl.getResponse();
     const response = new APIContracts.GetHostedPaymentPageResponse(apiResponse);
 
-    if (response != null && response.getMessages().getResultCode() === APIContracts.MessageTypeEnum.OK) {
+    if (
+      response != null &&
+      response.getMessages().getResultCode() === APIContracts.MessageTypeEnum.OK
+    ) {
       const token = response.getToken();
       const encodedToken = encodeURIComponent(token);
-      const redirectUrl = `https://test.authorize.net/payment/payment/${encodedToken}`;
+      const redirectUrl = `https://accept.authorize.net/payment/payment?token=${encodedToken}`;
 
       res.json({
         token,
-        redirectUrl
+        redirectUrl,
       });
     } else {
+      const errorMsg = response?.getMessages()?.getMessage()[0]?.getText() || "Unknown error";
       res.status(500).json({
-        message: response.getMessages().getMessage()[0].getText()
+        message: errorMsg,
       });
     }
   });
